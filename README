@@ -1,0 +1,81 @@
+# status
+
+experimental
+
+
+# intro
+
+q.b provides functionality similar to static linking:  making a
+program self-contained.
+
+q.b is a stand-alone 9p2000 server that can serve an embedded file
+tree (including data of files) and run a program from that tree.
+it only uses limbo modules built into the inferno dis vm.
+
+q.b includes a file called data.b.  this file must hold an assignment
+to the array of byte "data".  this data represents the file tree,
+it can be generated with qmk.  data.b can also be left empty, and
+q.dis run with a file containing the file tree as a parameter.
+
+qmk reads a list of files to include from stdin, and writes a file
+tree usable by q.dis to stdout.  with option -x, the output is
+suitable to be a data.b.  each line of input must contain one or
+two fields, tab-separated.  the first field is the file/dir name
+in q's file system.  if the second field is present, it points to
+the file in the local file system to use for its (meta)data.  this
+is similar to conf(10)'s root section.  qmk also needs at least one
+parameter.  the parameters are the command line that will be executed
+by q.b.  the first parameter must be the dis file to load and run.
+
+q requires that directories are specified explicitly too, i.e. the
+file "a/b" must be preceded by the file (directory) "a".  the root
+directory should not be specified explicitly.
+
+qgen is a shell script that generates a list of files and directories
+to include when given a dis file.  it uses disdep to generate
+dependencies.  it does not otherwise know about files and directories
+used by the program, so those will still have to be specified
+separately.
+
+the following example (must be run from within inferno) creates a
+version of ls(1) that does not require external libraries.
+
+	cd appl/cmd
+	qgen /dis/ls.dis | qmk -x /dis/ls.dis -l >data.b
+	cp q.b qlsl.b
+	limbo -gw qlsl.b
+	bind /tmp /dis  # to make sure we're not cheating
+	./qlsl.dis
+
+warnings:
+you may have to increase the allowed stack usage for the limbo
+compiler, compiling a q.b with a huge data.b consumes a lot of
+stack.
+
+as long as the program(s) started by q.b live and keep their
+namespace, q's processes stay alive and must not be killed.
+
+
+# install
+
+use of q.b will require some changes to your build environment.
+qmk can be build as follows:
+
+make sure $ROOT is set.  now "mk install" to compile and install the
+files.
+
+when building from within inferno, insert SYSHOST=Inferno and ROOT=
+in the mk invocations to override the values in the mkconfig.
+
+
+# latest version
+
+the latest version can be found at:
+
+    http://www.ueber.net/code/r/q
+
+
+# licence & author
+
+all files are in the public domain.  this code has been written by
+mechiel lukkien, reachable at mechiel@ueber.net.

@@ -1,0 +1,35 @@
+#!/dis/sh.dis
+load arg
+load std
+load string
+
+fn usage {
+	echo 'usage: qgen disfile [...]' >[1=2]
+	raise 'fail:usage'
+}
+fn fail {
+	echo $* >[1=2]
+	raise fail:$*
+}
+fn gendirs {
+	getlines {
+		echo $line
+		dir=''
+		for e in ${split / ${hd ${splitstrr $line /}}} {
+			dir=$dir^'/'^$e
+			echo $dir
+		}
+	}
+}
+
+for i in $* {
+	if {! test -f $i } {
+		f=/dis/^$i^.dis
+		if {! test -f $f } {
+			fail $i^' does not exist'
+		}
+		i=$f
+	}
+	echo $i
+	disdep $i
+} | gendirs | sort | uniq

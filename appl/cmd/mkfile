@@ -1,0 +1,16 @@
+<../../mkconfig
+
+TARG=\
+	qmk.dis\
+
+SYSMODULES=\
+	draw.m\
+	sys.m\
+	arg.m\
+	bufio.m\
+	string.m\
+	names.m\
+
+DISBIN=$ROOT/dis
+
+<$ROOT/mkfiles/mkdis
